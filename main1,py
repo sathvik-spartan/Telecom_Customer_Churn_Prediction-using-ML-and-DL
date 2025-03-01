@@ -1,0 +1,71 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+# Load dataset
+df = pd.read_csv('telecom_churn.csv')
+
+# Display first few rows of the dataset
+print(df.head())
+
+# Display dataset information (column types, non-null values, etc.)
+print(df.info())
+
+# Summary statistics of numerical features
+print(df.describe())
+
+# Check for missing values in the dataset
+print(df.isna().sum())
+
+# Check for duplicate records
+print(df.duplicated().sum())
+
+# Define target variable (y) and features (X)
+y = df['churn']
+X = df.drop(['customer_id', 'churn'], axis=1)  # Drop non-relevant columns
+
+# Drop rows with missing values in 'churn'
+df = df.dropna(subset=['churn'])
+
+# Display class distribution before resampling
+print("Class distribution before resampling:")
+print(y.value_counts())
+
+# Handle class imbalance using Random Over Sampling (ROS)
+ros = RandomOverSampler()
+X, y = ros.fit_resample(X, y)
+
+# Display class distribution after resampling
+print("Class distribution after resampling:")
+print(y.value_counts())
+
+# Encode categorical features using Ordinal Encoding
+oe = OrdinalEncoder()
+X = oe.fit_transform(X)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2529)
+
+# Initialize and train the Random Forest Classifier model
+rfc = RandomForestClassifier(random_state=2529)
+rfc.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = rfc.predict(X_test)
+
+# Display classification report (precision, recall, f1-score)
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+# Display confusion matrix
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+# Display accuracy score
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
